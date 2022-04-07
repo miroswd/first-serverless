@@ -8,7 +8,7 @@ const options = {
 }
 
 const isOffline = () => {
-  return proccess.env.IS_OFFLINE; // Quando estiver usando o serveless offline, essa env já é definida automaticamente 
+  return process.env.IS_OFFLINE; // Quando estiver usando o serveless offline, essa env já é definida automaticamente 
 }
 
 
