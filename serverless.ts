@@ -11,6 +11,7 @@ const serverlessConfiguration: AWS = {
   provider: {
     name: 'aws',
     runtime: 'nodejs14.x',
+    region:"us-east-1",
     apiGateway: {
       minimumCompressionSize: 1024,
       shouldStartNameWithService: true,
@@ -19,7 +20,25 @@ const serverlessConfiguration: AWS = {
       AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
       NODE_OPTIONS: '--enable-source-maps --stack-trace-limit=1000',
     },
+    lambdaHashingVersion: "20201221",
+    iamRoleStatements: [
+      {
+        // permitindo o usuário ter acesso ao dynamo
+        Effect: "Allow",
+        Action: ["dynamodb:*"],
+        Resource: ["*"]
+      },  
+      {
+        Effect: "Allow",
+        Action: ["s3:*"],
+        Resource: ["*"]
+      }
+    ] 
   },
+  package: {
+    individually: false,
+    include :["./src/templates/**"]
+  }, // empacotando tudo na mesma pasta
   // import the function via paths
   functions: {
     /* hello world :')
@@ -46,9 +65,21 @@ const serverlessConfiguration: AWS = {
           }
         }
       ]
+    },
+    verifyCertificate: {
+      handler: "src/functions/verifyCertificate.handler", // path
+      events: [
+        {
+          http: {
+            path: "verifyCertificate/{id}",
+            method: "get",
+            cors: true
+          }
+        }
+      ]
     }
     }, // aqui que declara as funções
-  package: { individually: true },
+  // package: { individually: true },
   custom: {
     esbuild: {
       bundle: true,
@@ -59,6 +90,7 @@ const serverlessConfiguration: AWS = {
       define: { 'require.resolve': undefined },
       platform: 'node',
       concurrency: 10,
+      external: ['chrome-aws-lambda']
     },
     dynamodb: {
       stages: ["dev", "local"],
